@@ -26,7 +26,7 @@ bookRoute.get('/', async (req, res) => {
 bookRoute.get('/player/:playerId', async (req, res) => {
     try {
       const playerId = req.params.playerId;
-      const booked = await bookModel.find({ player: playerId }).populate({path: 'disponibility', populate:{path: "fieldId"}}).populate({path: 'player', select:["surname", "name"]});
+      const booked = await bookModel.find({ player: playerId }).populate({path: 'disponibility', populate:{path: "fieldId", populate: {path: "center"}}}).populate({path: 'player', select:["surname", "name"]});
       res.json(booked);
     } catch (error) {
       console.error("Errore durante il recupero dei field del centro:", error);
@@ -88,11 +88,15 @@ bookRoute.post('/', authPlayerMiddleware, async (req,res, next)=>{
 
 
   //DELETE DELLA PRENOTAZIONE
-  bookRoute.delete("/:id", authPlayerMiddleware, async (req, res, next) => {
+  bookRoute.delete("/:id", async (req, res, next) => {
     try {
       
       await bookModel.deleteOne({
         _id: req.params.id,
+      });
+
+      await disponibilityModel.findByIdAndUpdate(req.body.disponibilityId, {isBooked: false}, {
+        new: true,
       });
      
       res.send("La prenotazione è stata eliminata").status(204);
