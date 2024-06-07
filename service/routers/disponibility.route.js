@@ -7,7 +7,7 @@ export const disponibilityRoute = Router();
 //RICHIESTA GET DELLA DISPONIBILITA DEL FIELD
 disponibilityRoute.get("/:fieldId", async (req, res, next) => {
     try {
-      let disponibilities = await disponibilityModel.find({fieldId: req.params.fieldId});
+      let disponibilities = await disponibilityModel.find({fieldId: req.params.fieldId, isBooked: false});
         
       res.send(disponibilities);
       console.log('ho le disponibilità del campo')

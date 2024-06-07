@@ -20,6 +20,20 @@ bookRoute.get('/', async (req, res) => {
   }
   })
 
+ 
+
+    // RICHIESTA GET DELLE PRENOTAZIONI DEL PLAYER
+bookRoute.get('/player/:playerId', async (req, res) => {
+    try {
+      const playerId = req.params.playerId;
+      const booked = await bookModel.find({ player: playerId }).populate({path: 'disponibility', populate:{path: "fieldId"}}).populate({path: 'player', select:["surname", "name"]});
+      res.json(booked);
+    } catch (error) {
+      console.error("Errore durante il recupero dei field del centro:", error);
+      res.status(500).json({ message: 'Errore durante il recupero dei field del centro' });
+    }
+  });
+
 
   // POST DELLA PRENOTAZIONE AL CAMPO
 bookRoute.post('/', authPlayerMiddleware, async (req,res, next)=>{
@@ -43,6 +57,10 @@ bookRoute.post('/', authPlayerMiddleware, async (req,res, next)=>{
 
         // Salva la prenotazione nel database
         await newBook.save();
+
+        await disponibilityModel.findByIdAndUpdate(req.body.disponibilityId, {isBooked: true}, {
+            new: true,
+          });
 
         res.status(201).send(newBook);
         console.log('Campo prenotato con successo');
@@ -70,7 +88,7 @@ bookRoute.post('/', authPlayerMiddleware, async (req,res, next)=>{
 
 
   //DELETE DELLA PRENOTAZIONE
-  bookRoute.delete("/:id", async (req, res, next) => {
+  bookRoute.delete("/:id", authPlayerMiddleware, async (req, res, next) => {
     try {
       
       await bookModel.deleteOne({
