@@ -6,6 +6,7 @@ import centerModel from "../models/center.model.js";
 import passport from "passport";
 
 
+
 export const authRouter = Router();
 
   
@@ -125,9 +126,14 @@ export const authRouter = Router();
 
     authRouter.get("/callback", passport.authenticate("google", {session:false}), (req,res,next)=>{
       try {
-        res.redirect(`http://localhost:3000/me?accessToken=${req.user.accessToken}`);
+        const accessToken = req.user.accToken;
+        const userId = req.user._id;
+        res.redirect(`http://localhost:3000/HomePage?accessToken=${req.user.accToken}&userId=${userId}`);
         
       } catch (error) {
         next(error);
       }
     });
+
+
+

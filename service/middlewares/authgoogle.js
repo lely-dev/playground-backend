@@ -10,7 +10,7 @@ const options = {
     callbackURL: process.env.G_CALLBACK
 }
 
-const googleStrategy = new GoogleStrategy(options, async( _, __, profile, passportNext)=>{
+const googleStrategy = new GoogleStrategy(options, async ( _, __, profile, passportNext)=>{
 
     try {
         // DESTRUTTURARE IL PROFILE
@@ -19,14 +19,16 @@ const googleStrategy = new GoogleStrategy(options, async( _, __, profile, passpo
     const user = await Player.findOne({email});
 
     if (user){
-        const accToken = await createAccessToken({
+        const accToken = await generateJWT({
             _id: user._id,
         });
+
+       
 
         passportNext(null, {accToken});
     } else {
 
-        const newUser = new User({
+        const newUser = new Player({
             username: email,
             password: sub,
             name: given_name,
@@ -43,6 +45,7 @@ const googleStrategy = new GoogleStrategy(options, async( _, __, profile, passpo
         });
 
         passportNext(null, {accToken});
+
 
     }
     } catch (error) {
